@@ -49,7 +49,7 @@ uint16_t Machine::read_val(uint16_t PC) {
     return (mem[PC] < SIZE) ? (mem[PC]) : (reg[mem[PC] - SIZE]);
 }
 
-//halt: 0
+// halt: 0
 // stop execution and terminate the program
 void Machine::halt() {
     m_log << "RECEIVED OPCODE HALT\nterminating program...\n";
@@ -89,7 +89,7 @@ void Machine::pop() {
 // set <a> to 1 if <b> is equal to <c>; set it to 0 otherwise
 void Machine::eq() {
     m_log << "opcode: eq()\n";
-    reg[mem[++PC] - SIZE] = (read_val(++PC) == read_val(++PC)) ? (1) : (0);
+    reg[mem[++PC] - SIZE] = read_val(++PC) == read_val(++PC);
 
     PC++;
 }
@@ -98,7 +98,7 @@ void Machine::eq() {
 // set <a> to 1 if <b> is greater than <c>; set it to 0 otherwise
 void Machine::gt() {
     m_log << "opcode: gt()\n";
-    reg[mem[++PC] - SIZE] = (read_val(++PC) > read_val(++PC)) ? (1) : (0);
+    reg[mem[++PC] - SIZE] = read_val(++PC) > read_val(++PC);
 
     PC++;
 }
@@ -244,6 +244,7 @@ void Machine::noop() {
 
 void Machine::run() {
     (this->*opc[mem[PC]])();;
+    cout << "PC = " << PC << endl;
 }
 
 // reads a file in binary mode and loads it into memory starting at address 0
@@ -258,25 +259,8 @@ void Machine::load_rom(ifstream &in) {
     m_log << "END - LOADING ROM\n";
 }
 
-string selector() {
-    cout << "1. challenge.bin\n";
-    cout << "2. other\n";
-    cout << "IDX >> ";
-    int k; 
-    do cin >> k; while(k < 1 || k > 2);
-    switch(k) {
-        case 1: default:
-            return "challenge.bin";
-        case 2:
-            string s;
-            cout << "ROM NAME >> ";
-            cin >> s;
-            return s;
-    }
-}
-
-int main() {
-    ifstream rom(selector(), ios::in | ios::binary);
+int main(int argc, char *argv[]) {
+    ifstream rom(argv[1], ios::in | ios::binary);
 
     Machine m;
     m.load_rom(rom);
