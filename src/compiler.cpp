@@ -185,10 +185,12 @@ void Compiler::out(std::string s) { // 19
 
     for(size_t i = 0; i < s.length(); i++) { 
         ss << std::setw(4) << to_le(0x13);
+        PC++;
 
         if(s[i] == '!') ss << std::setw(4) << to_le(32768 + (int)(s[++i]-'0'));
         else if(s[i] == '\\' && s[i+1] == 'n') { ss << std::setw(4) << to_le(10); i++; }
         else ss << std::setw(4) << to_le(s[i]);
+        PC++;
     }
 
     s = ss.str();
@@ -196,10 +198,8 @@ void Compiler::out(std::string s) { // 19
     for(size_t i = 0; i < s.length(); i += 2) {
         uint16_t k = std::stoi(s.substr(i, 2), 0, 16);
         _out->write((char *) &k, sizeof(char));
-        PC++;
     }
 
-    PC /= 2;
 } // 19
 
 void Compiler::in(const uint16_t a) { // 20
@@ -220,9 +220,7 @@ int main() {
     a.out("TEST ROM\\n\\n");     
 
     a.out("should set first reg to 48 (ascii value for 0) and print it.\\n");   
-    std::cout << a.PC << std::endl;  
     a.set(REG, 48);     
-    std::cout << a.PC << std::endl;  
     a.out("reg[0] = !0\\n\\n");     
 
     a.out("should push 48 to the stack (ascii value for 0), write it to reg[1] and pop it.\\n");     
@@ -232,7 +230,6 @@ int main() {
 
     a.out("the program should not halt since reg[2] is 1\\n");      
     a.eq(REG+2, REG, REG+1);   
-    std::cout << a.PC << std::endl;
     a.jt(REG+2, a.PC+2);  
     a.halt();    
     int t = a.PC;  
